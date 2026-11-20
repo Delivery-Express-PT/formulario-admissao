@@ -861,10 +861,18 @@ function overlay(){
   return pct=>{ p.style.strokeDashoffset=L*(1-pct); const pt=p.getPointAtLength(L*pct), c=$('#ov .car'); c.setAttribute('cx',pt.x); c.setAttribute('cy',pt.y);
     $('#ovP').textContent=Math.round(pct*100)+'%'; $('#ovT').textContent=tr(pct<.15?'env1':pct<.9?'env2':'env3'); };
 }
-function send(body,onp){ return new Promise((res,rej)=>{ const x=new XMLHttpRequest(); x.open('POST',ENDPOINT); x.setRequestHeader('Content-Type','text/plain;charset=utf-8');
-  x.upload.onprogress=e=>{ if(e.lengthComputable) onp(.1+.75*e.loaded/e.total); };
-  x.onload=()=>{ try{ res(JSON.parse(x.responseText)); }catch(e){ const t=(x.responseText||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); rej(new Error('Resposta inesperada da ponte (HTTP '+x.status+'): '+t.slice(0,140))); } };
-  x.onerror=()=>rej(new Error('rede')); x.timeout=120000; x.ontimeout=()=>rej(new Error('tempo')); x.send(body); }); }
+/* envio simples (sem cabeçalhos nem ouvintes de upload) para não haver pedido prévio que o Apps Script recusa */
+async function send(body,onp){
+  const est=Math.max(2500, body.length/180); const t0=performance.now(); let alive=true;
+  (function anim(){ if(!alive) return; const k=Math.min(1,(performance.now()-t0)/est); onp(.1+.78*(1-Math.pow(1-k,2))); requestAnimationFrame(anim); })();
+  try{
+    const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(),120000);
+    const r=await fetch(ENDPOINT,{method:'POST',body,redirect:'follow',signal:ctl.signal}); clearTimeout(to);
+    const txt=await r.text();
+    try{ return JSON.parse(txt); }catch(e){ const t=txt.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); throw new Error('Resposta inesperada da ponte (HTTP '+r.status+'): '+t.slice(0,140)); }
+  }catch(e){ if(e.name==='AbortError') throw new Error('tempo'); if(e instanceof TypeError) throw new Error('rede'); throw e; }
+  finally{ alive=false; }
+}
 async function submit(){
   const btn=$('#next'); btn.disabled=true;
   const pais=val('cartaPais')==='Outro país'?val('cartaOutroPais'):val('cartaPais');
