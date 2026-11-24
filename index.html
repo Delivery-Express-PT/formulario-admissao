@@ -529,6 +529,10 @@ input[type=date].inp{padding-right:14px}
                 <div class="f" data-f="niss"><label for="niss">NISS<span class="req">*</span></label><div class="iw"><input class="inp mono" id="niss" name="niss" inputmode="numeric" maxlength="11" placeholder="00000000000"><span class="st"></span></div><span class="ok-note" data-t="nissOk">NISS verificado</span><span class="err" data-t="eNiss">NISS inválido. Confirme os 11 dígitos.</span>
                   <label class="check" style="font-size:14px"><input type="checkbox" id="semNiss"><span data-t="semNiss">Ainda não tenho NISS</span></label></div>
               </div>
+              <div class="g2">
+                <div class="f" data-f="nacionalidade"><label for="nacionalidade"><span data-t="nac">Nacionalidade</span><span class="req">*</span></label><div class="iw"><select class="inp" id="nacionalidade" name="nacionalidade"><option value="" data-t="esc">Escolher</option></select></div><span class="err" data-t="eEsc">Escolha uma opção.</span></div>
+                <div class="f" data-f="nacOutra" id="nacOutraWrap" hidden><label for="nacOutra"><span data-t="qualNac">Qual nacionalidade?</span><span class="req">*</span></label><div class="iw"><input class="inp" id="nacOutra" name="nacOutra"><span class="st"></span></div><span class="err" data-t="eObr">Campo obrigatório.</span></div>
+              </div>
               <div class="f" data-f="docTipo"><label for="docTipo"><span data-t="docTipo">Tipo de documento</span><span class="req">*</span></label><div class="iw"><select class="inp" id="docTipo" name="docTipo">
                 <option value="" data-t="esc">Escolher</option><option value="Cartão de Cidadão" data-t="d1">Cartão de Cidadão</option><option value="Título de Residência" data-t="d2">Título ou Autorização de Residência</option><option value="Passaporte" data-t="d3">Passaporte</option><option value="Outro" data-t="outro">Outro</option></select></div><span class="err" data-t="eEsc">Escolha uma opção.</span></div>
               <div class="g2">
@@ -639,7 +643,7 @@ const T = {
   funcs:[['Motorista','Motorista','Conduz e faz as entregas','truck'],['Ajudante','Ajudante','Apoio nas entregas','box'],['Coordenador','Coordenador(a)','Coordena equipas e rotas','team'],['Outra','Outra função','Escritório ou armazém','dots']],
   ec:[['Solteiro(a)','Solteiro(a)'],['Casado(a)','Casado(a)'],['União de facto','União de facto'],['Divorciado(a)','Divorciado(a)'],['Viúvo(a)','Viúvo(a)']],
   tit:[['Dois titulares','Os dois trabalham'],['Único titular','Só eu trabalho']],
-  rv:{s2:'Dados pessoais',s3:'Morada',s4:'Identificação',s5:'Carta',s6:'Fardamento',nome:'Nome',nasc:'Nascimento',tel:'Telemóvel',email:'E-mail',ec:'Estado civil',dep:'Dependentes',mor:'Morada',doc:'Documento',val:'Validade',num:'Número',pais:'País',farda:'Tamanhos'}},
+  rv:{nac:'Nacionalidade',s2:'Dados pessoais',s3:'Morada',s4:'Identificação',s5:'Carta',s6:'Fardamento',nome:'Nome',nasc:'Nascimento',tel:'Telemóvel',email:'E-mail',ec:'Estado civil',dep:'Dependentes',mor:'Morada',doc:'Documento',val:'Validade',num:'Número',pais:'País',farda:'Tamanhos'}},
  en:{steps:[['Role','Your role in the team'],['Personal details','Contacts and household'],['Address','Where you live'],['Identification','Tax, social security and ID'],['Driving licence','Number, expiry and photos'],['Uniform','Uniform sizes'],['Confirm and sign','Final review']],
   passo:'Step',de:'of',seguinte:'Next',enviar:'Submit',concl:'complete',ola:'Hello',
   frente:'Front',verso:'Back',ficheiro:'Document',tirar:'Take a photo or choose a file',trocar:'Replace',analisar:'Analysing image',
@@ -650,7 +654,7 @@ const T = {
   funcs:[['Motorista','Driver','Drives and delivers','truck'],['Ajudante','Helper','Supports deliveries','box'],['Coordenador','Coordinator','Coordinates teams and routes','team'],['Outra','Other role','Office or warehouse','dots']],
   ec:[['Solteiro(a)','Single'],['Casado(a)','Married'],['União de facto','Civil partnership'],['Divorciado(a)','Divorced'],['Viúvo(a)','Widowed']],
   tit:[['Dois titulares','We both work'],['Único titular','Only I work']],
-  rv:{s2:'Personal details',s3:'Address',s4:'Identification',s5:'Licence',s6:'Uniform',nome:'Name',nasc:'Date of birth',tel:'Phone',email:'E-mail',ec:'Marital status',dep:'Dependants',mor:'Address',doc:'Document',val:'Valid until',num:'Number',pais:'Country',farda:'Sizes'},
+  rv:{nac:'Nationality',s2:'Personal details',s3:'Address',s4:'Identification',s5:'Licence',s6:'Uniform',nome:'Name',nasc:'Date of birth',tel:'Phone',email:'E-mail',ec:'Marital status',dep:'Dependants',mor:'Address',doc:'Document',val:'Valid until',num:'Number',pais:'Country',farda:'Sizes'},
   titulo:'Welcome to the team',intro:'Fill in your details in about 5 minutes. Have your ID document, driving licence and a proof of address at hand.',
   tr1:'Secure connection and confidential handling of your data',tr1b:'Secure connection, confidential data',tr2b:'Progress saved on this device',tr2:'Your progress is saved on this device',tr3:'About 5 minutes',
   s1:'Role',s1l:'Which role did you apply for?',rgT:'Your data is protected',rgP:'It is used only by Delivery Express for onboarding, payroll, insurance and occupational health, and stored privately.',
@@ -660,7 +664,7 @@ const T = {
   s4:'Identification',s4l:'Tax numbers and ID document.',nifOk:'NIF verified',nissOk:'NISS verified',eNif:'Invalid NIF. Check the 9 digits.',eNiss:'Invalid NISS. Check the 11 digits.',semNiss:'I don\'t have a NISS yet',
   docTipo:'Document type',d1:'Citizen Card',d2:'Residence permit',d3:'Passport',outro:'Other',docNum:'Document number',val:'Valid until',eVal:'Invalid date or expired document.',
   fotosDoc:'Photos of the document',fotoDica:'Whole document inside the marks, good light and no glare.',eFotos:'Add front and back.',
-  s5:'Driving licence',s5l:'Your driving licence details.',s5o:'Optional for your role. Fill in only if you have a licence.',cartaNum:'Licence number',cartaPais:'Country that issued the licence',qualPais:'Which country?',fotosCarta:'Photos of the licence',
+  s5:'Driving licence',s5l:'Your driving licence details.',s5o:'Optional for your role. Fill in only if you have a licence.',cartaNum:'Licence number',cartaPais:'Country that issued the licence',qualPais:'Which country?',nac:'Nationality',qualNac:'Which nationality?',fotosCarta:'Photos of the licence',
   s6:'Uniform',s6l:'So we can prepare your uniform.',camisa:'Jumper and t-shirt',calca:'Trousers',calcado:'Shoes',
   s7:'Confirm and sign',s7l:'Last step. Check your details before submitting.',comp:'Proof of address',compH:'Water, electricity or internet bill, rental contract or parish certificate. Photo or PDF.',eComp:'Add the proof of address.',
   ass:'Signature',assH:'Sign here with your finger',assI:'Same as on your ID document',limpar:'Clear',eAss:'Sign in the box above.',
@@ -674,10 +678,11 @@ const tr = k => (T[lang][k] ?? T.pt[k] ?? PT_TXT[k] ?? k);
 
 /* listas */
 const DISTRITOS = ['Aveiro','Beja','Braga','Bragança','Castelo Branco','Coimbra','Évora','Faro','Guarda','Leiria','Lisboa','Portalegre','Porto','Santarém','Setúbal','Viana do Castelo','Vila Real','Viseu','Região Autónoma dos Açores','Região Autónoma da Madeira'];
+const NACS = ['Portuguesa','Brasileira','Angolana','Cabo-verdiana','Moçambicana','Guineense','São-tomense','Timorense','Indiana','Nepalesa','Bangladeshiana','Paquistanesa','Ucraniana','Romena','Espanhola','Francesa','Alemã','Britânica','Italiana','Outra'];
 const PAISES = ['Portugal','Brasil','Angola','Cabo Verde','Moçambique','Guiné-Bissau','São Tomé e Príncipe','Timor-Leste','Índia','Nepal','Bangladesh','Paquistão','Ucrânia','Roménia','Espanha','França','Alemanha','Reino Unido','Itália','Outro país'];
 const SIZES = {camisa:['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],calca:['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],calcado:Array.from({length:14},(_,i)=>String(35+i))};
 const fillSel = (id,arr) => $(id).insertAdjacentHTML('beforeend', arr.map(v=>`<option>${v}</option>`).join(''));
-fillSel('#distrito',DISTRITOS); fillSel('#cartaPais',PAISES);
+fillSel('#distrito',DISTRITOS); fillSel('#cartaPais',PAISES); fillSel('#nacionalidade',NACS);
 
 function buildChoices(){
   const keep = n => val(n);
@@ -774,7 +779,7 @@ const RULES={
       ['telemovel',v=>v.replace(/\D/g,'').length>=9],['email',v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],['estadoCivil',v=>!!v],
       ['titulares',v=>!['Casado(a)','União de facto'].includes(val('estadoCivil'))||!!v]],
   s3:[['morada',v=>v.length>=5],['codigoPostal',v=>/^\d{4}-\d{3}$/.test(v)],['localidade',v=>v.length>=2],['distrito',v=>!!v]],
-  s4:[['nif',nifOk],['niss',v=>$('#semNiss').checked||nissOk(v)],['docTipo',v=>!!v],['docNumero',v=>v.length>=4],['docValidade',v=>!!v&&new Date(v)>=today()],['fotosDoc',()=>!!(files.docFrente&&files.docVerso)]],
+  s4:[['nif',nifOk],['niss',v=>$('#semNiss').checked||nissOk(v)],['nacionalidade',v=>!!v],['nacOutra',v=>val('nacionalidade')!=='Outra'||v.length>=3],['docTipo',v=>!!v],['docNumero',v=>v.length>=4],['docValidade',v=>!!v&&new Date(v)>=today()],['fotosDoc',()=>!!(files.docFrente&&files.docVerso)]],
   s5:[['cartaNumero',v=>!temCarta()||v.length>=4],['cartaValidade',v=>!temCarta()||(!!v&&new Date(v)>=today())],['cartaPais',v=>!temCarta()||!!v],
       ['cartaOutroPais',v=>val('cartaPais')!=='Outro país'||v.length>=2],['fotosCarta',()=>!temCarta()||!!(files.cartaFrente&&files.cartaVerso)]],
   s6:[['camisa',v=>!!v],['calca',v=>!!v],['calcado',v=>!!v]],
@@ -800,9 +805,11 @@ $('#dependentes').addEventListener('input',e=>e.target.value=e.target.value.repl
 $('#frm').addEventListener('input',e=>{ const b=e.target.closest('.f'); if(b?.dataset.f){ mark(b.dataset.f, b.classList.contains('bad')); } save(); progress(); });
 $('#frm').addEventListener('focusout',e=>{ const b=e.target.closest('.f'); if(b?.dataset.f && LIVE.includes(b.dataset.f) && val(b.dataset.f)) mark(b.dataset.f); });
 $('#frm').addEventListener('change',e=>{ const b=e.target.closest('.f'); if(b?.dataset.f && e.target.type==='radio') b.classList.remove('bad'); syncCond(); save(); progress(); });
+const nacV=()=>val('nacionalidade')==='Outra'?val('nacOutra'):val('nacionalidade');
 function syncCond(){
   $('#titWrap').hidden=!['Casado(a)','União de facto'].includes(val('estadoCivil'));
   $('#outroPaisWrap').hidden=val('cartaPais')!=='Outro país';
+  $('#nacOutraWrap').hidden=val('nacionalidade')!=='Outra';
   const opc=!cartaObrig(); $$('.req.cr').forEach(r=>r.hidden=opc);
   $('#cartaSub').textContent = opc ? (lang==='en'?T.en.s5o:'Opcional para a sua função. Preencha apenas se tiver carta.') : tr('s5l');
 }
@@ -856,7 +863,7 @@ function buildReview(){
   $('#rev').innerHTML=[
     blk(R.s2,1,[[R.nome,esc(val('nome'))],[R.nasc,dshow(val('nascimento'))],[R.tel,esc(val('telemovel'))],[R.email,esc(val('email'))],[R.ec,esc([ecl,$('#titWrap').hidden?'':til].filter(Boolean).join(' · '))],[R.dep,esc(val('dependentes')||'0')]]),
     blk(R.s3,2,[[R.mor,esc(val('morada'))],['',esc(`${val('codigoPostal')} ${val('localidade')}`)],['',esc(val('distrito'))]]),
-    blk(R.s4,3,[['NIF',`<span class="mono">${esc(val('nif'))}</span>`],['NISS',$('#semNiss').checked?esc(tr('semNissV')):`<span class="mono">${esc(val('niss'))}</span>`],[R.doc,esc(val('docTipo'))],[R.num,`<span class="mono">${esc(val('docNumero'))}</span>`],[R.val,dshow(val('docValidade'))]]),
+    blk(R.s4,3,[['NIF',`<span class="mono">${esc(val('nif'))}</span>`],['NISS',$('#semNiss').checked?esc(tr('semNissV')):`<span class="mono">${esc(val('niss'))}</span>`],[R.nac,esc(nacV())],[R.doc,esc(val('docTipo'))],[R.num,`<span class="mono">${esc(val('docNumero'))}</span>`],[R.val,dshow(val('docValidade'))]]),
     blk(R.s5,4, val('cartaNumero')?[[R.num,`<span class="mono">${esc(val('cartaNumero'))}</span>`],[R.pais,esc(pais)],[R.val,dshow(val('cartaValidade'))]]:[[R.s5,esc(tr('nenhuma'))]]),
     blk(R.s6,5,[[R.farda,esc(`${val('camisa')} · ${val('calca')} · ${val('calcado')}`)]])
   ].join('');
@@ -893,7 +900,7 @@ async function submit(){
     nome:val('nome').replace(/\s+/g,' '),nascimento:fmtD(val('nascimento')),telemovel:val('telemovel'),email:val('email').toLowerCase(),
     estadoCivil:val('estadoCivil'),titulares:$('#titWrap').hidden?'':val('titulares'),dependentes:val('dependentes')||'0',
     morada:val('morada'),codigoPostal:val('codigoPostal'),localidade:val('localidade'),distrito:val('distrito'),
-    nif:val('nif'),niss:$('#semNiss').checked?'':val('niss'),docTipo:val('docTipo'),docNumero:val('docNumero').toUpperCase(),docValidade:fmtD(val('docValidade')),
+    nif:val('nif'),niss:$('#semNiss').checked?'':val('niss'),nacionalidade:nacV(),docTipo:val('docTipo'),docNumero:val('docNumero').toUpperCase(),docValidade:fmtD(val('docValidade')),
     cartaNumero:val('cartaNumero').toUpperCase(),cartaPais:val('cartaNumero')?pais:'',cartaValidade:val('cartaNumero')?fmtD(val('cartaValidade')):'',
     camisa:val('camisa'),calca:val('calca'),calcado:val('calcado'),rgpd:val('rgpd')===true,idioma:lang,ficheiros:fichs};
   const set=overlay(); set(.05);
