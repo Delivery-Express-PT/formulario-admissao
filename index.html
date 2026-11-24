@@ -318,6 +318,7 @@ input[type=date].inp{padding-right:14px}
 .sh p{max-width:46ch;margin-inline:auto}
 .hint{display:block}
 .f>.hint{margin-top:-2px}
+.cpinfo.ok{color:var(--ok,#16a34a);font-weight:600}.cpinfo.no{color:var(--warn,#b45309)}
 .chips{justify-content:flex-start}
 .note{text-align:left}
 .cfg{justify-content:center;text-align:left}
@@ -512,12 +513,12 @@ input[type=date].inp{padding-right:14px}
         <section class="step" data-name="s3" data-ic="home">
           <div class="card"><div class="sh"><span class="ic"></span><div><h2 data-t="s3">Morada</h2><p data-t="s3l">Onde vive atualmente.</p></div></div>
             <div class="grid">
-              <div class="f" data-f="morada"><label for="morada"><span data-t="morada">Rua, número e andar</span><span class="req">*</span></label><div class="iw"><input class="inp" id="morada" name="morada" autocomplete="street-address"><span class="st"></span></div><span class="err" data-t="eObr">Campo obrigatório.</span></div>
               <div class="g2">
-                <div class="f" data-f="codigoPostal"><label for="codigoPostal"><span data-t="cp">Código postal</span><span class="req">*</span></label><div class="iw"><input class="inp mono" id="codigoPostal" name="codigoPostal" inputmode="numeric" autocomplete="postal-code" placeholder="0000-000" maxlength="8"><span class="st"></span></div><span class="err" data-t="eCp">Formato 0000-000.</span></div>
+                <div class="f" data-f="codigoPostal"><label for="codigoPostal"><span data-t="cp">Código postal</span><span class="req">*</span></label><div class="iw"><input class="inp mono" id="codigoPostal" name="codigoPostal" inputmode="numeric" autocomplete="postal-code" placeholder="0000-000" maxlength="8"><span class="st"></span></div><span class="hint cpinfo" id="cpInfo" data-t="cpAuto">Preenchemos a localidade e o distrito por si.</span><span class="err" data-t="eCp">Formato 0000-000.</span></div>
                 <div class="f" data-f="localidade"><label for="localidade"><span data-t="loc">Localidade</span><span class="req">*</span></label><div class="iw"><input class="inp" id="localidade" name="localidade" autocomplete="address-level2"><span class="st"></span></div><span class="err" data-t="eObr">Campo obrigatório.</span></div>
               </div>
               <div class="f" data-f="distrito"><label for="distrito"><span data-t="dist">Distrito</span><span class="req">*</span></label><div class="iw"><select class="inp" id="distrito" name="distrito"><option value="" data-t="esc">Escolher</option></select></div><span class="err" data-t="eEsc">Escolha uma opção.</span></div>
+              <div class="f" data-f="morada"><label for="morada"><span data-t="morada">Rua, número e andar</span><span class="req">*</span></label><div class="iw"><input class="inp" id="morada" name="morada" autocomplete="street-address" list="ruasCP"><span class="st"></span></div><datalist id="ruasCP"></datalist><span class="err" data-t="eObr">Campo obrigatório.</span></div>
             </div></div>
         </section>
 
@@ -664,7 +665,7 @@ const T = {
   s4:'Identification',s4l:'Tax numbers and ID document.',nifOk:'NIF verified',nissOk:'NISS verified',eNif:'Invalid NIF. Check the 9 digits.',eNiss:'Invalid NISS. Check the 11 digits.',semNiss:'I don\'t have a NISS yet',
   docTipo:'Document type',d1:'Citizen Card',d2:'Residence permit',d3:'Passport',outro:'Other',docNum:'Document number',val:'Valid until',eVal:'Invalid date or expired document.',
   fotosDoc:'Photos of the document',fotoDica:'Whole document inside the marks, good light and no glare.',eFotos:'Add front and back.',
-  s5:'Driving licence',s5l:'Your driving licence details.',s5o:'Optional for your role. Fill in only if you have a licence.',cartaNum:'Licence number',cartaPais:'Country that issued the licence',qualPais:'Which country?',nac:'Nationality',qualNac:'Which nationality?',fotosCarta:'Photos of the licence',
+  s5:'Driving licence',s5l:'Your driving licence details.',s5o:'Optional for your role. Fill in only if you have a licence.',cartaNum:'Licence number',cartaPais:'Country that issued the licence',qualPais:'Which country?',nac:'Nationality',qualNac:'Which nationality?',cpAuto:'We fill in the town and district for you.',cpBusca:'Searching…',cpOk:'Found',cpNo:'We could not find this code. Please fill in the town and district.',cpRua:'Choose your street from the list or type it.',cpManual:'Please fill in the town and district.',fotosCarta:'Photos of the licence',
   s6:'Uniform',s6l:'So we can prepare your uniform.',camisa:'Jumper and t-shirt',calca:'Trousers',calcado:'Shoes',
   s7:'Confirm and sign',s7l:'Last step. Check your details before submitting.',comp:'Proof of address',compH:'Water, electricity or internet bill, rental contract or parish certificate. Photo or PDF.',eComp:'Add the proof of address.',
   ass:'Signature',assH:'Sign here with your finger',assI:'Same as on your ID document',limpar:'Clear',eAss:'Sign in the box above.',
@@ -799,6 +800,38 @@ $('#codigoPostal').addEventListener('input',e=>{ let v=e.target.value.replace(/\
 $('#nif').addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,9));
 $('#niss').addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,11));
 $('#telemovel').addEventListener('input',e=>e.target.value=e.target.value.replace(/[^\d+\s]/g,'').slice(0,16));
+/* Código postal: preenche localidade e distrito (geoapi.pt, dados CTT/INE) */
+const CP_CACHE=new Map(); let cpSeq=0;
+const PT_CP={cpAuto:'Preenchemos a localidade e o distrito por si.',cpBusca:'A procurar…',cpOk:'Encontrado',cpNo:'Não encontrámos este código. Preencha a localidade e o distrito.',cpRua:'Escolha a sua rua da lista ou escreva-a.',cpManual:'Preencha a localidade e o distrito.'};
+const cpT=k=>lang==='en'?T.en[k]:PT_CP[k];
+const titleCase=t=>String(t||'').toLowerCase().replace(/(^|[\s\-'(])([a-zà-ÿ])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
+const nrmD=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function distritoDe(d){ const n=nrmD(d); if(!n) return ''; if(n.includes('madeira')||n.includes('porto santo')) return 'Região Autónoma da Madeira';
+  if(/acores|sao miguel|terceira|faial|pico|graciosa|flores|corvo|santa maria|sao jorge/.test(n)) return 'Região Autónoma dos Açores';
+  return DISTRITOS.find(x=>nrmD(x)===n)||''; }
+function cpInfo(txt,cls){ const el=$('#cpInfo'); el.textContent=txt; el.className='hint cpinfo'+(cls?' '+cls:''); }
+async function cpLookup(){
+  const cp=val('codigoPostal'); if(!/^\d{4}-\d{3}$/.test(cp)){ cpInfo(cpT('cpAuto')); return; }
+  const seq=++cpSeq; cpInfo(cpT('cpBusca'));
+  let d=CP_CACHE.get(cp);
+  if(!d){ try{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),6000);
+      const r=await fetch('https://json.geoapi.pt/cp/'+cp,{signal:ac.signal}); clearTimeout(to); d=r.ok?await r.json():null; CP_CACHE.set(cp,d); }catch(e){ d='erro'; } }
+  if(seq!==cpSeq) return;
+  if(d==='erro'){ cpInfo(cpT('cpManual')); return; }
+  if(seq!==cpSeq) return;
+  if(!d||!(d.Localidade||d.Concelho)){ cpInfo(cpT('cpNo'),'no'); const L=$('#localidade'), D=$('#distrito'); if(L.dataset.auto==='1'){ L.value=''; L.dataset.auto=''; } if(D.dataset.auto==='1'){ D.value=''; D.dataset.auto=''; } $('#ruasCP').innerHTML=''; save(); progress(); return; }
+  const loc=titleCase(d.Localidade||d.Concelho), dist=distritoDe(d.Distrito);
+  const L=$('#localidade'), D=$('#distrito');
+  if(!L.value.trim()||L.dataset.auto==='1'){ L.value=loc; L.dataset.auto='1'; mark('localidade',false); }
+  if(dist&&(!D.value||D.dataset.auto==='1')){ D.value=dist; D.dataset.auto='1'; mark('distrito',false); }
+  const ruas=[...new Set((d.partes||[]).map(p=>[p['Artéria'],p.Local].filter(Boolean).join(', ')).filter(Boolean))].slice(0,60);
+  $('#ruasCP').innerHTML=ruas.map(r=>`<option value="${esc(r)}">`).join('');
+  cpInfo(`✓ ${cpT('cpOk')}: ${loc}${dist?', '+dist:''}${ruas.length?'. '+cpT('cpRua'):''}`,'ok');
+  save(); progress();
+}
+$('#codigoPostal').addEventListener('input',()=>{ if(/^\d{4}-\d{3}$/.test(val('codigoPostal'))) cpLookup(); else cpInfo(cpT('cpAuto')); });
+$('#localidade').addEventListener('input',e=>{ e.target.dataset.auto=''; });
+$('#distrito').addEventListener('change',e=>{ e.target.dataset.auto=''; });
 $('#semNiss').addEventListener('change',e=>{ $('#niss').disabled=e.target.checked; if(e.target.checked){ $('#niss').value=''; } mark('niss',false); });
 $$('[data-dep]').forEach(b=>b.addEventListener('click',()=>{ const i=$('#dependentes'); i.value=Math.max(0,Math.min(15,(+i.value||0)+ +b.dataset.dep)); save(); }));
 $('#dependentes').addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,2));
