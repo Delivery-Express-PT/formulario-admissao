@@ -501,9 +501,9 @@ input[type=date].inp{padding-right:14px}
                 <div class="f" data-f="telemovel"><label for="telemovel"><span data-t="tel">Telemóvel</span><span class="req">*</span></label><div class="iw"><input class="inp" type="tel" id="telemovel" name="telemovel" inputmode="tel" autocomplete="tel" placeholder="912 345 678"><span class="st"></span></div><span class="err" data-t="eTel">Número inválido.</span></div>
               </div>
               <div class="f" data-f="email"><label for="email"><span data-t="email">E-mail</span><span class="req">*</span><span class="hint" data-t="emailH">para receber os recibos de vencimento</span></label><div class="iw"><input class="inp" type="email" id="email" name="email" inputmode="email" autocomplete="email" placeholder="nome@email.com"><span class="st"></span></div><span class="err" data-t="eEmail">E-mail inválido.</span></div>
-              <div class="f" data-f="estadoCivil"><span class="lbl"><span data-t="ec">Estado civil</span><span class="req">*</span></span>
+              <div class="f" data-f="estadoCivil"><span class="lbl"><span data-t="ecL">Estado civil</span><span class="req">*</span></span>
                 <div class="chips" data-chips="estadoCivil"></div><span class="err" data-t="eEsc">Escolha uma opção.</span></div>
-              <div class="f" data-f="titulares" id="titWrap" hidden><span class="lbl"><span data-t="tit">Rendimentos do casal</span><span class="req">*</span><span class="hint" data-t="titH">para a retenção de IRS</span></span>
+              <div class="f" data-f="titulares" id="titWrap" hidden><span class="lbl"><span data-t="titL">Rendimentos do casal</span><span class="req">*</span><span class="hint" data-t="titH">para a retenção de IRS</span></span>
                 <div class="chips" data-chips="titulares"></div><span class="err" data-t="eEsc">Escolha uma opção.</span></div>
               <div class="f" data-f="dependentes"><span class="lbl"><span data-t="dep">Dependentes</span><span class="hint" data-t="depH">filhos ou outros a seu cargo</span></span>
                 <div class="num-step"><button type="button" data-dep="-1" aria-label="Menos">−</button><input id="dependentes" name="dependentes" inputmode="numeric" value="0" aria-label="Dependentes"><button type="button" data-dep="1" aria-label="Mais">+</button></div></div>
@@ -660,7 +660,7 @@ const T = {
   tr1:'Secure connection and confidential handling of your data',tr1b:'Secure connection, confidential data',tr2b:'Progress saved on this device',tr2:'Your progress is saved on this device',tr3:'About 5 minutes',
   s1:'Role',s1l:'Which role did you apply for?',rgT:'Your data is protected',rgP:'It is used only by Delivery Express for onboarding, payroll, insurance and occupational health, and stored privately.',
   s2:'Personal details',s2l:'As shown on your ID document.',nome:'Full name',eNome:'Enter your full name (first and last name).',nascimento:'Date of birth',eNasc:'Invalid date. Minimum age is 18.',tel:'Mobile phone',eTel:'Invalid number.',email:'E-mail',emailH:'to receive your payslips',eEmail:'Invalid e-mail.',
-  ec:'Marital status',eEsc:'Choose an option.',tit:'Household income',titH:'for tax withholding',dep:'Dependants',depH:'children or others in your care',
+  ecL:'Marital status',eEsc:'Choose an option.',titL:'Household income',titH:'for tax withholding',dep:'Dependants',depH:'children or others in your care',
   s3:'Address',s3l:'Where you currently live.',morada:'Street, number and floor',eObr:'Required field.',cp:'Postcode',eCp:'Format 0000-000.',loc:'Town or city',dist:'District',esc:'Choose',
   s4:'Identification',s4l:'Tax numbers and ID document.',nifOk:'NIF verified',nissOk:'NISS verified',eNif:'Invalid NIF. Check the 9 digits.',eNiss:'Invalid NISS. Check the 11 digits.',semNiss:'I don\'t have a NISS yet',
   docTipo:'Document type',d1:'Citizen Card',d2:'Residence permit',d3:'Passport',outro:'Other',docNum:'Document number',val:'Valid until',eVal:'Invalid date or expired document.',
@@ -675,6 +675,7 @@ const T = {
 const PT_TXT = {};
 let lang = 'pt';
 try{ lang = localStorage.getItem('de_adm_lang') || 'pt'; }catch(e){}
+if(lang!=='pt'&&lang!=='en') lang='pt';
 const tr = k => (T[lang][k] ?? T.pt[k] ?? PT_TXT[k] ?? k);
 
 /* listas */
