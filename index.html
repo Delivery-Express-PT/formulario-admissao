@@ -606,10 +606,60 @@ input[type=date].inp{padding-right:14px}
 </div>
 <canvas id="confetti" hidden></canvas>
 <script>
-{
 /* ================= CONFIGURAÇÃO ================= */
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzCnXGRjmssu7YuBGhzSS4EPWvsClIJaWNBDjLwqRfRCHcloJMT7lFepOn8eSERxJYtFQ/exec'; // URL do Apps Script que termina em /exec
 /* ================================================ */
+
+/* ===== Rede de segurança: regista erros e nunca deixa a página em branco ===== */
+(function(){
+  const PONTE=/^https:\/\/script\.google\.com\//.test(ENDPOINT)?ENDPOINT:'';
+  const enviados=new Set(); let total=0;
+  function passo(){ try{ return (document.querySelector('#stepTitle')||{}).textContent||''; }catch(e){ return ''; } }
+  function reportar(tipo,mensagem,detalhe){
+    try{
+      const msg=String(mensagem||'').slice(0,300), chave=tipo+'|'+msg;
+      if(enviados.has(chave)||total>=8) return; enviados.add(chave); total++;
+      const corpo={a:'erro',tipo:tipo,mensagem:msg,detalhe:String(detalhe||'').slice(0,900),
+        pagina:location.pathname,operacao:new URLSearchParams(location.search).get('op')||'',
+        passo:passo(),idioma:document.documentElement.lang||'',ecra:innerWidth+'x'+innerHeight,
+        browser:navigator.userAgent.slice(0,200),quando:new Date().toISOString()};
+      try{ console.warn('[DE erro]',tipo,msg); }catch(e){}
+      if(!PONTE) return;
+      fetch(PONTE,{method:'POST',body:JSON.stringify(corpo),keepalive:true}).catch(function(){});
+    }catch(e){}
+  }
+  window.deReportar=reportar;
+  addEventListener('error',function(e){ if(e&&e.message) reportar('erro',e.message,(e.error&&e.error.stack)||(e.filename+':'+e.lineno+':'+e.colno)); });
+  addEventListener('unhandledrejection',function(e){ const r=e&&e.reason; reportar('promessa',(r&&r.message)||r,r&&r.stack); });
+
+  /* se o formulário não arrancar, limpa o que estiver guardado e tenta de novo; à terceira mostra uma mensagem */
+  function vigiar(){
+    if(window.deArrancou) { try{ sessionStorage.removeItem('de_adm_recuperar'); }catch(e){} return; }
+    let n=0; try{ n=+sessionStorage.getItem('de_adm_recuperar')||0; }catch(e){}
+    reportar('arranque','O formulário não arrancou (tentativa '+(n+1)+')','');
+    if(n<2){
+      try{
+        sessionStorage.setItem('de_adm_recuperar',String(n+1));
+        localStorage.removeItem('de_adm_lang');
+        if(n===1) localStorage.removeItem('de_adm_rascunho');
+      }catch(e){}
+      setTimeout(function(){ location.reload(); },400); return;
+    }
+    try{ sessionStorage.removeItem('de_adm_recuperar'); }catch(e){}
+    const box=document.createElement('div');
+    box.setAttribute('role','alert');
+    box.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:#0B1220;color:#fff;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center';
+    box.innerHTML='<div style="max-width:420px"><div style="font-size:20px;font-weight:700;margin-bottom:10px">Não foi possível abrir o formulário</div>'+
+      '<p style="margin:0 0 8px;opacity:.85">A equipa da Delivery Express já foi avisada. Feche esta página e volte a abrir o link dentro de alguns minutos.</p>'+
+      '<p style="margin:0 0 20px;opacity:.6;font-size:14px">We could not open the form. Our team has been notified. Please try again in a few minutes.</p>'+
+      '<button type="button" style="background:#307FE2;color:#fff;border:0;border-radius:12px;padding:12px 22px;font:inherit;font-weight:600;cursor:pointer" onclick="location.reload()">Tentar de novo</button></div>';
+    document.body.appendChild(box);
+  }
+  addEventListener('load',function(){ setTimeout(vigiar,1500); });
+})();
+</script>
+<script>
+{
 
 const DEMO = !/^https:\/\/script\.google\.com\//.test(ENDPOINT);
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -638,9 +688,9 @@ const T = {
   passo:'Passo',de:'de',seguinte:'Seguinte',enviar:'Enviar ficha',concl:'concluído',ola:'Olá',
   frente:'Frente',verso:'Verso',ficheiro:'Documento',tirar:'Tirar foto ou escolher ficheiro',trocar:'Trocar',analisar:'A analisar a imagem',
   ok:'Imagem nítida',escura:'Foto escura',clara:'Foto com reflexos',desf:'Pode estar desfocada',pdf:'PDF adicionado',
-  grande:'Ficheiro demasiado grande (máximo 10 MB).',falha:'Não foi possível enviar. Verifique a ligação à internet e tente de novo.',
+  grande:'Ficheiro demasiado grande (máximo 10 MB).',falha:'Não foi possível enviar. Os seus dados continuam aqui: verifique a internet e carregue de novo em Enviar ficha.',
   semNissV:'Sem NISS',nenhuma:'Sem carta',editar:'Editar',copiado:'Referência copiada',
-  env1:'A preparar os documentos',env2:'A enviar a ficha',env3:'A registar na Delivery Express',
+  env1:'A preparar os documentos',env2:'A enviar a ficha',env3:'A registar na Delivery Express',env4:'Ligação fraca, a tentar de novo',
   funcs:[['Motorista','Motorista','Conduz e faz as entregas','truck'],['Ajudante','Ajudante','Apoio nas entregas','box'],['Coordenador','Coordenador(a)','Coordena equipas e rotas','team'],['Outra','Outra função','Escritório ou armazém','dots']],
   ec:[['Solteiro(a)','Solteiro(a)'],['Casado(a)','Casado(a)'],['União de facto','União de facto'],['Divorciado(a)','Divorciado(a)'],['Viúvo(a)','Viúvo(a)']],
   tit:[['Dois titulares','Os dois trabalham'],['Único titular','Só eu trabalho']],
@@ -649,9 +699,9 @@ const T = {
   passo:'Step',de:'of',seguinte:'Next',enviar:'Submit',concl:'complete',ola:'Hello',
   frente:'Front',verso:'Back',ficheiro:'Document',tirar:'Take a photo or choose a file',trocar:'Replace',analisar:'Analysing image',
   ok:'Sharp image',escura:'Photo too dark',clara:'Photo has glare',desf:'May be blurry',pdf:'PDF added',
-  grande:'File too large (max 10 MB).',falha:'Could not send. Check your connection and try again.',
+  grande:'File too large (max 10 MB).',falha:'Could not send. Your details are still here: check your connection and tap Send form again.',
   semNissV:'No NISS',nenhuma:'No licence',editar:'Edit',copiado:'Reference copied',
-  env1:'Preparing documents',env2:'Sending form',env3:'Registering with Delivery Express',
+  env1:'Preparing documents',env2:'Sending form',env3:'Registering with Delivery Express',env4:'Weak connection, trying again',
   funcs:[['Motorista','Driver','Drives and delivers','truck'],['Ajudante','Helper','Supports deliveries','box'],['Coordenador','Coordinator','Coordinates teams and routes','team'],['Outra','Other role','Office or warehouse','dots']],
   ec:[['Solteiro(a)','Single'],['Casado(a)','Married'],['União de facto','Civil partnership'],['Divorciado(a)','Divorced'],['Viúvo(a)','Widowed']],
   tit:[['Dois titulares','We both work'],['Único titular','Only I work']],
@@ -676,7 +726,11 @@ const PT_TXT = {};
 let lang = 'pt';
 try{ lang = localStorage.getItem('de_adm_lang') || 'pt'; }catch(e){}
 if(lang!=='pt'&&lang!=='en') lang='pt';
-const tr = k => (T[lang][k] ?? T.pt[k] ?? PT_TXT[k] ?? k);
+const mesmoTipo = (a,b) => b===undefined || (Array.isArray(a)===Array.isArray(b) && typeof a===typeof b);
+const tr = k => { const v=(T[lang]||T.pt)[k], p=T.pt[k];
+  if(v!==undefined && mesmoTipo(v,p)) return v;
+  if(v!==undefined) window.deReportar?.('texto','Texto EN com tipo errado: '+k,'');
+  return p ?? PT_TXT[k] ?? k; };
 
 /* listas */
 const DISTRITOS = ['Aveiro','Beja','Braga','Bragança','Castelo Branco','Coimbra','Évora','Faro','Guarda','Leiria','Lisboa','Portalegre','Porto','Santarém','Setúbal','Viana do Castelo','Vila Real','Viseu','Região Autónoma dos Açores','Região Autónoma da Madeira'];
@@ -911,7 +965,7 @@ function overlay(){
     <span class="ov-logo" role="img" aria-label="Delivery Express"></span><div class="ov-bar"><i id="ovB"></i></div>
     <b id="ovT">${esc(tr('env1'))}</b><div class="pct" id="ovP">0%</div></div></div>`);
   return pct=>{ $('#ovB').style.width=Math.round(pct*100)+'%';
-    $('#ovP').textContent=Math.round(pct*100)+'%'; $('#ovT').textContent=tr(pct<.15?'env1':pct<.9?'env2':'env3'); };
+    $('#ovP').textContent=Math.round(pct*100)+'%'; $('#ovT').textContent=tr(window.deRetry?'env4':pct<.15?'env1':pct<.9?'env2':'env3'); };
 }
 /* envio simples (sem cabeçalhos nem ouvintes de upload) para não haver pedido prévio que o Apps Script recusa */
 async function send(body,onp){
@@ -925,8 +979,12 @@ async function send(body,onp){
   }catch(e){ if(e.name==='AbortError') throw new Error('tempo'); if(e instanceof TypeError) throw new Error('rede'); throw e; }
   finally{ alive=false; }
 }
+let ENVIO_ID='';
+const novoEnvioId=()=>'E'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+const espera=ms=>new Promise(r=>setTimeout(r,ms));
 async function submit(){
   const btn=$('#next'); btn.disabled=true;
+  if(!ENVIO_ID) ENVIO_ID=novoEnvioId();
   const pais=val('cartaPais')==='Outro país'?val('cartaOutroPais'):val('cartaPais');
   const fichs=Object.entries(files).filter(([k])=>temCarta()||!k.startsWith('carta')).map(([campo,f])=>({campo,mime:f.mime,b64:f.b64}));
   fichs.push({campo:'assinatura',mime:'image/png',b64:cv.toDataURL('image/png').split(',')[1]});
@@ -936,17 +994,29 @@ async function submit(){
     morada:val('morada'),codigoPostal:val('codigoPostal'),localidade:val('localidade'),distrito:val('distrito'),
     nif:val('nif'),niss:$('#semNiss').checked?'':val('niss'),nacionalidade:nacV(),docTipo:val('docTipo'),docNumero:val('docNumero').toUpperCase(),docValidade:fmtD(val('docValidade')),
     cartaNumero:val('cartaNumero').toUpperCase(),cartaPais:val('cartaNumero')?pais:'',cartaValidade:val('cartaNumero')?fmtD(val('cartaValidade')):'',
-    camisa:val('camisa'),calca:val('calca'),calcado:val('calcado'),rgpd:val('rgpd')===true,idioma:lang,ficheiros:fichs};
+    camisa:val('camisa'),calca:val('calca'),calcado:val('calcado'),rgpd:val('rgpd')===true,idioma:lang,envioId:ENVIO_ID,ficheiros:fichs};
   const set=overlay(); set(.05);
   try{
     let res;
     if(DEMO){ for(let p=.05;p<=1;p+=.05){ set(p); await new Promise(r=>setTimeout(r,70)); } res={ok:true,id:'DEMO-'+Date.now().toString().slice(-6)}; }
-    else { res=await send(JSON.stringify(payload),set); set(1); }
+    else {
+      const body=JSON.stringify(payload), PAUSAS=[2000,5000,9000];
+      for(let t=0;;t++){
+        try{ res=await send(body,set); break; }
+        catch(err){
+          const m=String(err&&err.message||err), temporario=m==='rede'||m==='tempo'||m.startsWith('Resposta inesperada');
+          if(!temporario||t>=PAUSAS.length) throw err;
+          window.deReportar?.('envio-repetido','Tentativa '+(t+1)+' falhou: '+m,'');
+          window.deRetry=true; set(.1); await espera(PAUSAS[t]); window.deRetry=false;
+        }
+      }
+      set(1);
+    }
     if(!res.ok) throw new Error(res.erro||'erro');
     await new Promise(r=>setTimeout(r,350));
-    $('#refId').textContent=res.id; try{ localStorage.removeItem(DRAFT); }catch(e){}
+    $('#refId').textContent=res.id; ENVIO_ID=''; try{ localStorage.removeItem(DRAFT); }catch(e){}
     $('#ov').remove(); cur=STEPS.length; render(1); confetti();
-  }catch(e){ $('#ov')?.remove(); const m=String(e&&e.message||e); toast(m==='rede'||m==='tempo'?tr('falha'):tr('falha')+' ('+m+')'); btn.disabled=false; }
+  }catch(e){ window.deRetry=false; $('#ov')?.remove(); const m=String(e&&e.message||e); window.deReportar?.('envio','Ficha não enviada: '+m,''); toast(m==='rede'||m==='tempo'?tr('falha'):tr('falha')+' ('+m+')'); btn.disabled=false; }
 }
 $('#copyRef').addEventListener('click',()=>{ navigator.clipboard?.writeText($('#refId').textContent).then(()=>toast(tr('copiado'))).catch(()=>{}); });
 function confetti(){
@@ -985,6 +1055,7 @@ const qf=Q.get('funcao'); if(qf){ const r=[...$('#frm').elements.funcao].find(x=
 $('#cfgWarn').hidden=!DEMO; $('#saved').style.opacity=.55;
 LIVE.forEach(k=>{ if(val(k)) mark(k,false); });
 applyLang();
+window.deArrancou=true;
 }
 </script>
 </body>
