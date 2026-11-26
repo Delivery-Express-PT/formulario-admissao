@@ -1002,9 +1002,9 @@ async function submit(){
     else {
       const body=JSON.stringify(payload), PAUSAS=[2000,5000,9000];
       for(let t=0;;t++){
-        try{ res=await send(body,set); break; }
+        try{ res=await send(body,set); if(!res.ok&&/ocupado/i.test(res.erro||'')) throw new Error('ocupado'); break; }
         catch(err){
-          const m=String(err&&err.message||err), temporario=m==='rede'||m==='tempo'||m.startsWith('Resposta inesperada');
+          const m=String(err&&err.message||err), temporario=m==='rede'||m==='tempo'||m==='ocupado'||m.startsWith('Resposta inesperada');
           if(!temporario||t>=PAUSAS.length) throw err;
           window.deReportar?.('envio-repetido','Tentativa '+(t+1)+' falhou: '+m,'');
           window.deRetry=true; set(.1); await espera(PAUSAS[t]); window.deRetry=false;
@@ -1016,7 +1016,7 @@ async function submit(){
     await new Promise(r=>setTimeout(r,350));
     $('#refId').textContent=res.id; ENVIO_ID=''; try{ localStorage.removeItem(DRAFT); }catch(e){}
     $('#ov').remove(); cur=STEPS.length; render(1); confetti();
-  }catch(e){ window.deRetry=false; $('#ov')?.remove(); const m=String(e&&e.message||e); window.deReportar?.('envio','Ficha não enviada: '+m,''); toast(m==='rede'||m==='tempo'?tr('falha'):tr('falha')+' ('+m+')'); btn.disabled=false; }
+  }catch(e){ window.deRetry=false; $('#ov')?.remove(); const m=String(e&&e.message||e); window.deReportar?.('envio','Ficha não enviada: '+m,''); toast(m==='rede'||m==='tempo'||m==='ocupado'?tr('falha'):tr('falha')+' ('+m+')'); btn.disabled=false; }
 }
 $('#copyRef').addEventListener('click',()=>{ navigator.clipboard?.writeText($('#refId').textContent).then(()=>toast(tr('copiado'))).catch(()=>{}); });
 function confetti(){
